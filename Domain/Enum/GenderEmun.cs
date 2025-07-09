@@ -4,9 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Infestrueture.Data
+namespace Domain.Enum
 {
-    public class UserDBContext
+    public enum GenderEmun
     {
+        Male = 'M',
+        Female = 'F',
+        Other = 'O'
     }
 }
