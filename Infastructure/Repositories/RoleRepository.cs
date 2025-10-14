@@ -34,7 +34,7 @@ namespace Infrastructure.Repositories
         public async Task AddRoleAsync(Role role)
         {
             const string Sql = @"
-                INSERT INTO Roles (, RoleName, IsActive, Description, CreatedAt, UpdatedAt)
+                INSERT INTO Roles (RoleName, IsActive, Description, CreatedAt, UpdatedAt)
                 VALUES ( @RoleName, @IsActive, @Description, @CreatedAt, @UpdatedAt)";
             if (role == null)
             {
@@ -57,7 +57,8 @@ namespace Infrastructure.Repositories
                                 Description = role.Description,
                                 CreatedAt = DateTimeOffset.Now,
                                 UpdatedAt = DateTimeOffset.Now,
-                            });
+                            },transaction:tran);
+                            tran.Commit();
                         }
                         catch (Exception)
                         {
@@ -179,7 +180,8 @@ namespace Infrastructure.Repositories
                             Description = role.Description,
                             CreatedAt = DateTimeOffset.Now,
                             UpdatedAt = DateTimeOffset.Now,
-                        });
+                        },transaction:tran);
+                        tran.Commit();
                     }
                     catch (Exception)
                     {

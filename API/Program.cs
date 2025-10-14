@@ -34,6 +34,7 @@ builder.Services.AddScoped<AccountService>();
 
 builder.Services.AddControllers();
 
+var  jwtconfig= builder.Configuration.GetSection("jwtconfig");
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -49,9 +50,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseRouting();
 app.MapControllers();
 
 app.Run();

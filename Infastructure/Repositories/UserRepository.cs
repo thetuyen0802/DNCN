@@ -98,7 +98,8 @@ namespace Infestrueture.Repositories
                             user.CreatedBy,
                             user.UpdatedBy,
                             user.RoleId
-                        });
+                        },transaction:tran);
+                        tran.Commit();
                     }
                     catch (Exception)
                     {
@@ -175,7 +176,7 @@ namespace Infestrueture.Repositories
             const string sql = "SELECT * FROM Users WHERE RoleId =@roleId ";
             using (var connection = _connectionFactory.CreateConnection())
             {
-                var result = await connection.QueryAsync<User>(sql,roleId);
+                var result = await connection.QueryAsync<User>(sql,new { RoleId = roleId });
                 return result;
                 //result nullable
             }
@@ -186,7 +187,8 @@ namespace Infestrueture.Repositories
             const string sql = "SELECT * FROM Users WHERE Status =@status ";
             using (var connection = _connectionFactory.CreateConnection())
             {
-                var result = await connection.QueryAsync<User>(sql, status);
+                var result = await connection.QueryAsync<User>(sql,new{
+                    Status = status});
                 return result;
                 //result nullable
             }
@@ -194,10 +196,10 @@ namespace Infestrueture.Repositories
 
         public async Task<string> GetPasswordByUsername(string username)
         {
-            const string sql = "SELECT PasswordHash FROM User WHERE @UserName = username ";
+            const string sql = "SELECT PasswordHash FROM User WHERE UserName = @username ";
             using(var connection = _connectionFactory.CreateConnection())
             {
-                var result = await connection.QueryFirstOrDefaultAsync<string>(sql, username);
+                var result = await connection.QueryFirstOrDefaultAsync<string>(sql,new { UserName = username });
                 return result.ToString() ;
             }
         }
@@ -207,7 +209,7 @@ namespace Infestrueture.Repositories
             const string sql = "SELECT COUNT(1) FROM Users WHERE PhoneNumber =@phoneNumber ";
             using(var connection = _connectionFactory.CreateConnection())
             {
-                var result = await connection.ExecuteScalarAsync<int>(sql, phoneNumber);
+                var result = await connection.ExecuteScalarAsync<int>(sql,new { PhoneNumber = phoneNumber });
                 return result > 0;
             }
         }
@@ -246,8 +248,8 @@ namespace Infestrueture.Repositories
                             user.CreatedBy,
                             user.UpdatedBy,
                             user.RoleId
-                        });
-
+                        },transaction:tran);
+                        tran.Commit();
                     }
                     catch (Exception)
                     {
@@ -265,7 +267,7 @@ namespace Infestrueture.Repositories
             const string sql = "SELECT COUNT(1) FROM Users WHERE UserId = @Userid";
             using( var connection = _connectionFactory.CreateConnection())
             {
-                var result = await connection.ExecuteScalarAsync<int>(sql,id);
+                var result = await connection.ExecuteScalarAsync<int>(sql,new { UserId = id });
                 return result > 0;
             }
         }
@@ -275,7 +277,7 @@ namespace Infestrueture.Repositories
             const string sql = "SELECT COUNT(1) FROM Users WHERE UserName  = @UserName";
             using (var connection = _connectionFactory.CreateConnection())
             {
-                var result = await connection.ExecuteScalarAsync<int>(sql, username);
+                var result = await connection.ExecuteScalarAsync<int>(sql,new { UserName = username });
                 return result > 0;
             }
         }
@@ -284,7 +286,7 @@ namespace Infestrueture.Repositories
             const string sql = "SELECT * FROM Users WHERE UserName  = @UserName";
             using (var connection = _connectionFactory.CreateConnection())
             {
-                var result = await connection.QuerySingleAsync(sql, username);
+                var result = await connection.QuerySingleAsync(sql, new { UserName = username });
                 return result;
             }
         }
