@@ -181,7 +181,7 @@ namespace Infestrueture.Repositories
             }
         }
 
-        public async Task<IEnumerable<User>> GetUsersByStatusAsync(UserStatusEmun status)
+        public async Task<IEnumerable<User>> GetUsersByStatusAsync(UserStatusEnum status)
         {
             const string sql = "SELECT * FROM Users WHERE Status =@status ";
             using (var connection = _connectionFactory.CreateConnection())

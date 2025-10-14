@@ -18,7 +18,7 @@ namespace Domain.Repositories
         Task<User> GetUserByEmailAsync(string email);
         Task<bool> UserExistsAsync(Guid id);
         Task<IEnumerable<User>> GetUsersByRoleAsync(Guid roleId);
-        Task<IEnumerable<User>> GetUsersByStatusAsync(UserStatusEmun status);
+        Task<IEnumerable<User>> GetUsersByStatusAsync(UserStatusEnum status);
         Task <string> GetPasswordByUsername(string username);
         Task<bool> UsernameExists(string username);
         Task<User> GetUserByUsername(string username);

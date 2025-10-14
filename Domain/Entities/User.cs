@@ -24,7 +24,7 @@ namespace Domain.Entities
         public string LastName { get; set; }
         public string PhoneNumber { get; set; }
         public DateTime? DateOfBirth { get; set; }
-        public GenderEmun Gender { get; set; } // 'M', 'F', 'O'
+        public GenderEnum Gender { get; set; } // 'M', 'F', 'O'
 
         // Thông tin xác thực
         public bool EmailVerified { get; set; } 
@@ -35,7 +35,7 @@ namespace Domain.Entities
         public DateTimeOffset? ResetTokenExpiry { get; set; }
 
         // Trạng thái và thời gian
-        public UserStatusEmun Status { get; set; } 
+        public UserStatusEnum Status { get; set; } 
         public DateTimeOffset? LastLoginAt { get; set; }
         public int LoginAttempts { get; set; }
         public DateTimeOffset? LockoutUntil { get; set; }

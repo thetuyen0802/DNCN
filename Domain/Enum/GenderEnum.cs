@@ -6,13 +6,10 @@ using System.Threading.Tasks;
 
 namespace Domain.Enum
 {
-    public enum UserStatusEmun
+    public enum GenderEnum
     {
-        Pending = 0, // chờ xử lý
-        Active = 1,
-        Locked = 2,
-        Banned = 3,
-        Deleted = 4
-
+        Male = 0,
+        Female = 1,
+       
     }
 }

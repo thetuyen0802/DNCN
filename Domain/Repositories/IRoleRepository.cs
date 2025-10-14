@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Domain.Repositories
 {
-    public interface IRoleRepositories
+    public interface IRoleRepository
     {
         // Define methods for role repository
         Task<Role> GetRoleByIdAsync(Guid id);

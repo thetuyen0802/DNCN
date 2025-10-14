@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Infrastructure.Repositories
 {
-    public class RoleRepository : IRoleRepositories
+    public class RoleRepository : IRoleRepository
     {
         private readonly IConnectionFactory _connectionFactory;
         public RoleRepository(IConnectionFactory connectionFactory)

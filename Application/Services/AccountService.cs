@@ -27,7 +27,7 @@ namespace Application.Services
         {
             if (await _userRepository.UsernameExists(username))
             {
-                string passwordHass = _userRepository.GetPasswordByUsername(username).ToString();
+                string passwordHass  = await _userRepository.GetPasswordByUsername(username);
 
                 if (_passwordHasher.Verify(password, passwordHass))
                 {

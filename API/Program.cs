@@ -1,4 +1,10 @@
-﻿var builder = WebApplication.CreateBuilder(args);
+﻿using Application.Services;
+using Domain.Repositories;
+using Infestrueture.Repositories;
+using Infrastructure.Repositories;
+using Infrastructure.Services.JwtServices;
+
+var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
@@ -19,6 +25,12 @@ builder.Services.AddSingleton(new Infrastructure.Services.PasswordHasher.BcryptO
 });
 // Register the PasswordHasher service
 builder.Services.AddScoped<Infrastructure.Services.PasswordHasher.IPasswordHasher, Infrastructure.Services.PasswordHasher.PasswordHasher>();
+builder.Services.AddScoped<IUserRepository,UserRepository>();
+builder.Services.AddScoped<IRoleRepository,RoleRepository>();
+builder.Services.AddScoped<IJwtService,JwtService>();
+builder.Services.AddScoped<AccountService>();
+
+
 
 builder.Services.AddControllers();
 
