@@ -2,6 +2,7 @@
 using Domain.Entities;
 using Domain.Repositories;
 using Infrastructure.Data;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,22 +19,74 @@ namespace Infrastructure.Repositories
         {
             _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
         }
-        public Task AddRoleAsync(Role role)
+        //public Guid RoleId { get; set; }
+        //public string RoleName { get; set; }
+        //public bool IsActive { get; set; }
+        //public string? Description { get; set; }
+        //public DateTimeOffset CreatedAt { get; set; }
+        //public DateTimeOffset UpdatedAt { get; set; }
+
+        //// Constructor mặc định
+        //public Role()
+        //{
+
+        //}
+        public async Task AddRoleAsync(Role role)
         {
-            throw new NotImplementedException();
+            const string Sql = @"
+                INSERT INTO Roles (, RoleName, IsActive, Description, CreatedAt, UpdatedAt)
+                VALUES ( @RoleName, @IsActive, @Description, @CreatedAt, @UpdatedAt)";
+            if (role == null)
+            {
+                throw new ArgumentNullException(nameof(role), "Role cannot be null");
+            }
+            else
+            {
+                using (var connect = _connectionFactory.CreateConnection())
+                {
+                    
+                    using (var tran  = connect.BeginTransaction())
+                    {
+                        try
+                        {
+                            await connect.ExecuteAsync(Sql, new
+                            {
+
+                                RoleName = role.RoleName,
+                                IsActive = role.IsActive,
+                                Description = role.Description,
+                                CreatedAt = DateTimeOffset.Now,
+                                UpdatedAt = DateTimeOffset.Now,
+                            });
+                        }
+                        catch (Exception)
+                        {
+                            tran.Rollback();
+                            throw new Exception("Insert error");
+                        }
+                        
+                    }
+                   
+                }
+            }
         }
 
-        public Task DeleteRoleAsync(int id)
+        public async Task DeleteRoleAsync(Guid id)
         {
-            throw new NotImplementedException();
-        }
-
-        public Task<IEnumerable<Role>> GetAllRolesAsync()
-        {
-            var Sql = "SELECT * FROM Roles";
+            const string Sql = "UPDATE Role SET IsActive = 0 WHERE RoleId = @id ";
+            await RoleExistsAsync(id);
             using (var connection = _connectionFactory.CreateConnection())
             {
-                return connection.QueryAsync<Role>(Sql);
+                await connection.ExecuteAsync(Sql, new { id });
+            }
+        }
+
+        public async Task<IEnumerable<Role>> GetAllRolesAsync()
+        {
+            const string Sql = "SELECT RoleId, RoleName, IsActive, Description, CreatedAt, UpdatedAt  FROM Roles";
+            using (var connection = _connectionFactory.CreateConnection())
+            {
+               return await connection.QueryAsync<Role>(Sql);
             }
         }
 
@@ -44,31 +97,98 @@ namespace Infrastructure.Repositories
                 throw new ArgumentException("Id must be a valid non-empty GUID", nameof(id));
             }
 
-            const string Sql = "SELECT * FROM Roles WHERE RoleId = @RoleId";
+            const string Sql = "SELECT RoleId, RoleName, IsActive, Description, CreatedAt, UpdatedAt FROM Roles WHERE RoleId = @RoleId";
             using (var connection = _connectionFactory.CreateConnection())
             {
-                return await connection.QuerySingleOrDefaultAsync<Role>(Sql, new { RoleId = id }).ConfigureAwait(false);
+                var role = await connection.QuerySingleOrDefaultAsync<Role>(Sql, new { RoleId = id }).ConfigureAwait(false);
+                if (role == null)
+                {
+                     throw new KeyNotFoundException($"Role with ID {id} not found.");
+                }
+                return role;
             }
         }
          
-        public Task<Role> GetRoleByNameAsync(string name)
+        public async Task<IEnumerable<Role>> GetRoleByNameAsync(string name)
         {
-            throw new NotImplementedException();
+            if (name.IsNullOrEmpty())
+            {
+                throw new ArgumentException("Id must be a valid non-empty GUID", nameof(name));
+            }
+
+            const string Sql = "SELECT RoleId, RoleName, IsActive, Description, CreatedAt, UpdatedAt FROM Roles WHERE RoleName = @RoleName";
+            using (var connection = _connectionFactory.CreateConnection())
+            {
+                var role = await connection.QueryAsync<Role>(Sql, new {RoleName = name}).ConfigureAwait(false);
+                if (role == null)
+                {
+                    throw new KeyNotFoundException($"Role with ID {name} not found.");
+                }
+                return role;
+            }
         }
 
-        public Task<Role> GetRoleIsActive()
+        public async Task<IEnumerable<Role>> GetRoleIsActive()
         {
-            throw new NotImplementedException();
+            const string Sql = "SELECT RoleId, RoleName, IsActive, Description, CreatedAt, UpdatedAt FROM Roles WHERE IsActive = 1";
+            using (var connection = _connectionFactory.CreateConnection())
+            {
+                return await connection.QueryAsync<Role>(Sql);
+            }
         }
 
-        public Task<bool> RoleExistsAsync(Guid id)
+        public async Task<bool> RoleExistsAsync(Guid id)
         {
-            throw new NotImplementedException();
+            const string Sql = "SELECT COUNT(1) FROM Roles WHERE RoleId = @RoleId";
+            if (id == Guid.Empty)
+            {
+                throw new ArgumentException("Id must be a valid non-empty GUID", nameof(id));
+            }
+            using (var connection = _connectionFactory.CreateConnection())
+            {
+                 var role = await connection.ExecuteScalarAsync<int>(Sql, new { RoleId = id });
+                return role > 0;
+            }
         }
 
-        public Task UpdateRoleAsync(Role role)
+        public async Task UpdateRoleAsync(Role role)
         {
-            throw new NotImplementedException();
+            bool exists = await RoleExistsAsync(role.RoleId);
+            if (!exists)
+            {
+                throw new ArgumentException("Role does not exist", nameof(role.RoleId));
+            }
+            const string Sql = @"
+                UPDATE Roles 
+                SET RoleName = @RoleName, 
+                    IsActive = @IsActive, 
+                    Description = @Description, 
+                    UpdatedAt = @UpdatedAt 
+                WHERE RoleId = @RoleId";
+            using(var connect = _connectionFactory.CreateConnection())
+            {
+                using (var tran = connect.BeginTransaction())
+                {
+                    try
+                    {
+                        await connect.ExecuteAsync(Sql, new
+                        {
+
+                            RoleName = role.RoleName,
+                            IsActive = role.IsActive,
+                            Description = role.Description,
+                            CreatedAt = DateTimeOffset.Now,
+                            UpdatedAt = DateTimeOffset.Now,
+                        });
+                    }
+                    catch (Exception)
+                    {
+                        tran.Rollback();
+                        throw new Exception("Update error");
+                    }
+                }
+            }
+
         }
     }
 }

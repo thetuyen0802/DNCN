@@ -14,9 +14,9 @@ namespace Domain.Repositories
         Task<IEnumerable<Role>> GetAllRolesAsync();
         Task AddRoleAsync(Role role);
         Task UpdateRoleAsync(Role role);
-        Task DeleteRoleAsync(int id);
-        Task<Role> GetRoleByNameAsync(string name);
-        Task<Role> GetRoleIsActive();
+        Task DeleteRoleAsync(Guid id);
+        Task<IEnumerable<Role>> GetRoleByNameAsync(string name);
+        Task<IEnumerable<Role>> GetRoleIsActive();
         Task<bool> RoleExistsAsync(Guid id);
     }
 }

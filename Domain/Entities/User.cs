@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 namespace Domain.Entities
 {
     using Domain.Enum;
-    using Infrastructure.Enum;
     using System;
 
     public class User

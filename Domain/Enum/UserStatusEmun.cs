@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Infrastructure.Enum
+namespace Domain.Enum
 {
     public enum UserStatusEmun
     {
