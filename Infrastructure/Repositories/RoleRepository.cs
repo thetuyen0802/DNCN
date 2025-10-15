@@ -44,7 +44,7 @@ namespace Infrastructure.Repositories
             {
                 using (var connect = _connectionFactory.CreateConnection())
                 {
-                    
+                    connect.Open();
                     using (var tran  = connect.BeginTransaction())
                     {
                         try
@@ -168,13 +168,14 @@ namespace Infrastructure.Repositories
                 WHERE RoleId = @RoleId";
             using(var connect = _connectionFactory.CreateConnection())
             {
+                connect.Open();
                 using (var tran = connect.BeginTransaction())
                 {
                     try
                     {
                         await connect.ExecuteAsync(Sql, new
                         {
-
+                            RoleId = role.RoleId,
                             RoleName = role.RoleName,
                             IsActive = role.IsActive,
                             Description = role.Description,

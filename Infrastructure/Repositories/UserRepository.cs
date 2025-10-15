@@ -14,7 +14,7 @@ using System.Runtime.Versioning;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Infestrueture.Repositories
+namespace Infrastrueture.Repositories
 {
     public class UserRepository : IUserRepository
     {
@@ -71,6 +71,7 @@ namespace Infestrueture.Repositories
               VALUES (@UserName , @PasswordHash , @Email , @FirstName , @LastName , @PhoneNumber , @DateOfBirth , @Gender , @EmailVerified , @PhoneVerified , @VerificationToken , @VerificationTokenExpiry , @Status , @LastLoginAt , @LoginAttempts , @LockoutUntil , @CreatedAt ,@UpdatedAt , @CreatedBy , @UpdatedBy , @RoleId )";
             using (var connection = _connectionFactory.CreateConnection())
             {
+                connection.Open();
                 using (var tran = connection.BeginTransaction())
                 {
                     try
@@ -154,7 +155,7 @@ namespace Infestrueture.Repositories
             const string sql = "SELECT * FROM Users WHERE Email =@email ";
             using( var connection = _connectionFactory.CreateConnection())
             {
-                var result = await connection.QueryFirstOrDefaultAsync<User>(sql,email);
+                var result = await connection.QueryFirstOrDefaultAsync<User>(sql,new { Email = email });
                 return result;
                 //result nullable
             }
@@ -165,7 +166,7 @@ namespace Infestrueture.Repositories
             const string sql = "SELECT * FROM Users WHERE UserId =@id ";
             using (var connection = _connectionFactory.CreateConnection())
             {
-                var result = await connection.QueryFirstOrDefaultAsync<User>(sql,id);
+                var result = await connection.QueryFirstOrDefaultAsync<User>(sql,new { UserId = id });
                 return result;
                 //result nullable
             }
@@ -196,7 +197,7 @@ namespace Infestrueture.Repositories
 
         public async Task<string> GetPasswordByUsername(string username)
         {
-            const string sql = "SELECT PasswordHash FROM User WHERE UserName = @username ";
+            const string sql = "SELECT PasswordHash FROM Users WHERE UserName = @username ";
             using(var connection = _connectionFactory.CreateConnection())
             {
                 var result = await connection.QueryFirstOrDefaultAsync<string>(sql,new { UserName = username });
@@ -221,13 +222,14 @@ namespace Infestrueture.Repositories
 
             using( var connection = _connectionFactory.CreateConnection())
             {
+                connection.Open();
                 using (var tran = connection.BeginTransaction())
                 {
                     try
                     {
                         await connection.ExecuteAsync(sql, new
                         {
-                           
+                           user.UserId,
                             user.PasswordHash,
                             user.Email,
                             user.FirstName,
