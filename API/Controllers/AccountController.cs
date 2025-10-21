@@ -25,24 +25,20 @@ namespace API.Controllers
         {
             try
             {
+                
+               
                 if (string.IsNullOrEmpty(request.Username) || string.IsNullOrEmpty(request.Password))
                 {
                     return BadRequest(new { message = "Username and password are required" });
                 }
+                var result = await _accountService.Login(request);
 
-                var result = await _accountService.Login(request.Username, request.Password);
-
-                if (result.StartsWith("Đăng nhập thành công"))
+                if (result.code ==200)
                 {
-                    return Ok(new
-                    {
-                        success = true,
-                        message = "Login successful",
-                        token = result.Replace("Đăng nhập thành công Token :", "").Trim()
-                    });
+                    return Ok(result);
                 }
 
-                return Unauthorized(new { success = false, message = result });
+                return Unauthorized(new { success = result.message });
             }
             catch (Exception ex)
             {

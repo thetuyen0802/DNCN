@@ -1,4 +1,6 @@
 ﻿
+using API.DTOs.Request.Login;
+using Application.DTOs.Responses.Account;
 using Domain.Entities;
 using Domain.Enum;
 using Domain.Repositories;
@@ -25,10 +27,10 @@ namespace Application.Services
             _userRepository = userRepository;
             _passwordHasher = passwordHasher;
         }
-        public async Task<string> Login(string username , string password)
+        public async Task<LoginResponse> Login(LoginRequest request)
         {
             //Test
-            if(username == "user1" || password == "1234")
+            if(request.Username == "user1" || request.Password == "1234")
             {
                 var fakeUser = new User
                 {
@@ -62,11 +64,13 @@ namespace Application.Services
 
                     RoleId = Guid.NewGuid()
                 };
-                return "Đăng nhập thành công " + "Token :" + _jwtService.GenarateToken(fakeUser);
+
+                return new LoginResponse() { message="Login success",token = _jwtService.GenarateToken(fakeUser),code = 200 };
+
             }
             else
             {
-                return "Đăng nhập thành không công ";
+                return new LoginResponse() { message = "Login fail", token = "null" , code = 400 };
             }
             //if (await _userRepository.UsernameExists(username))
             //{

@@ -25,46 +25,7 @@ namespace Infrastrueture.Repositories
             _connectionFactory = connectionFactory;
 
         }
-        //// ID người dùng
-        //public Guid UserId { get; set; }
-
-        //// Thông tin đăng nhập
-        //public string UserName { get; set; }
-        //public string PasswordHash { get; set; }
-        //public string Email { get; set; }
-
-        //// Thông tin cá nhân
-        //public string FirstName { get; set; }
-        //public string LastName { get; set; }
-        //public string PhoneNumber { get; set; }
-        //public DateTime? DateOfBirth { get; set; }
-        //public GenderEmun Gender { get; set; } // 'M', 'F', 'O'
-
-        //// Thông tin xác thực
-        //public bool EmailVerified { get; set; }
-        //public bool PhoneVerified { get; set; }
-        //public string VerificationToken { get; set; }
-        //public DateTimeOffset? VerificationTokenExpiry { get; set; }
-        //public string ResetToken { get; set; }
-        //public DateTimeOffset? ResetTokenExpiry { get; set; }
-
-        //// Trạng thái và thời gian
-        //public UserStatusEmun Status { get; set; }
-        //public DateTimeOffset? LastLoginAt { get; set; }
-        //public int LoginAttempts { get; set; }
-        //public DateTimeOffset? LockoutUntil { get; set; }
-
-        //// Metadata
-        //public DateTimeOffset CreatedAt { get; set; }
-        //public DateTimeOffset UpdatedAt { get; set; }
-        //public Guid? CreatedBy { get; set; }
-        //public Guid? UpdatedBy { get; set; }
-
-        //// Khóa ngoại
-        //public Guid RoleId { get; set; }
-
-        //// Thuộc tính tính toán (không cần mapping)
-        //public string FullName => $"{FirstName} {LastName}";
+       
         public async Task AddUserAsync(User user)
         {
             const string sql = @"INSERT INTO Users (UserName , PasswordHash , Email , FirstName , LastName , PhoneNumber , DateOfBirth , Gender , EmailVerified , PhoneVerified , VerifcationToken , VerificationTokenExpiry , Status , LastLoginAt , LoginAttempts , LockoutUntil , CreatedAt ,UpdatedAt , CreatedBy , UpdatedBy , RoleId )
