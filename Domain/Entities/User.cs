@@ -22,7 +22,7 @@ namespace Domain.Entities
         // Thông tin cá nhân
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public string PhoneNumber { get; set; }
+        public string? PhoneNumber { get; set; }
         public DateTime? DateOfBirth { get; set; }
         public GenderEnum Gender { get; set; } // 'M', 'F', 'O'
 
@@ -42,7 +42,7 @@ namespace Domain.Entities
 
         // Metadata
         public DateTimeOffset CreatedAt { get; set; }
-        public DateTimeOffset UpdatedAt { get; set; }
+        public DateTimeOffset? UpdatedAt { get; set; }
         public Guid? CreatedBy { get; set; }
         public Guid? UpdatedBy { get; set; }
 

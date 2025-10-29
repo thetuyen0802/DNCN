@@ -1,6 +1,9 @@
-﻿using Application.DTOs.Requests.Role;
+﻿using Application.Common;
+using Application.DTOs.Requests.Role;
 using Application.DTOs.Responses.Role;
+using Application.Interfaces;
 using AutoMapper;
+using Domain.Entities;
 using Domain.Repositories;
 using System;
 using System.Collections.Generic;
@@ -10,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace Application.Services
 {
-    public class RoleService
+    public class RoleService:IRoleService
     {
         private readonly IRoleRepository _roleRepository;  
         private readonly IMapper _mapper;
@@ -20,9 +23,23 @@ namespace Application.Services
             _roleRepository = roleRepository;
             _mapper = mapper;
         }
-        public async Task<CreateRoleResponse> CreateRole(CreateRoleRequest role)
+        public async Task<Result<CreateRoleResponse>> CreateRole(CreateRoleRequest role)
         {
-            await _roleRepository.AddRoleAsync();
+            try
+            {
+                Role roleadded = _mapper.Map<Role>(role);
+                roleadded.IsActive = true;
+                roleadded.CreatedAt = DateTime.Now;
+                await _roleRepository.AddRoleAsync(roleadded);
+
+                return Result<CreateRoleResponse>.Ok(_mapper.Map<CreateRoleResponse>(roleadded));
+            }
+            catch (Exception ex)
+            {
+
+                return Result.Fail<CreateRoleResponse>(ex.Message,ErrorCode.DB_INSERT_FAILED,ex);
+            }
+            
         }
 
     }

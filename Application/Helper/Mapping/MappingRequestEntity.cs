@@ -12,9 +12,9 @@ using System.Threading.Tasks;
 
 namespace Application.Helper.Mapping
 {
-    public class MappingProffile :Profile
+    public class MappingRequestEntity :Profile
     {
-        public MappingProffile()
+        public MappingRequestEntity()
         {
             //Map RegiterAccountRequest với User
             #region
@@ -50,7 +50,6 @@ namespace Application.Helper.Mapping
                 .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
                 .ForMember(dest => dest.IsActive, opt => opt.Ignore())
                 .ReverseMap();
-
             #endregion
         }
 

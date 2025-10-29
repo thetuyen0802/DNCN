@@ -6,7 +6,11 @@ using System.Threading.Tasks;
 
 namespace Infrastructure.Services.MessagingServices
 {
-    public class SmsService
+    public class SmsService : IMessagingService
     {
+        public Task SendAsync(string to, string subject, string body)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

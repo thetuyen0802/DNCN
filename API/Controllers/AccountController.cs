@@ -1,7 +1,9 @@
 ﻿using API.DTOs.Request.Login;
+using Application.Interfaces;
 using Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace API.Controllers
 {
@@ -9,9 +11,9 @@ namespace API.Controllers
     [ApiController]
     public class AccountController : ControllerBase
     {
-        private readonly AccountService _accountService;
+        private readonly IAccountService _accountService;
 
-        public AccountController(AccountService accountService)
+        public AccountController(IAccountService accountService)
         {
             _accountService = accountService;
         }
@@ -23,27 +25,8 @@ namespace API.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            try
-            {
-                
-               
-                if (string.IsNullOrEmpty(request.Username) || string.IsNullOrEmpty(request.Password))
-                {
-                    return BadRequest(new { message = "Username and password are required" });
-                }
-                var result = await _accountService.Login(request);
-
-                if (result.code ==200)
-                {
-                    return Ok(result);
-                }
-
-                return Unauthorized(new { success = result.message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { success = false, message = ex.Message });
-            }
+            var res = JsonConvert.SerializeObject(await _accountService.Login(request));
+            return Ok(res);
         }
 
         /// <summary>

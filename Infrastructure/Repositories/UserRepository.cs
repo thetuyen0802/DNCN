@@ -81,11 +81,29 @@ namespace Infrastrueture.Repositories
             const string sql = "UPDATE Users SET Status = 1  WHERE UserId = @UserId";
             using (var connection = _connectionFactory.CreateConnection())
             {
-                var result = await connection.ExecuteAsync(sql, new { UserId = id });
-                if (result == 0)
-                {
-                    throw new KeyNotFoundException($"User with ID {id} not found.");
+                connection.Open();
+                using (var tran = connection.BeginTransaction()) {
+                    try
+                    {
+                        var result = await connection.ExecuteAsync(sql, new { UserId = id });
+                        if (result == 0)
+                        {
+                            tran.Rollback();
+                            throw new KeyNotFoundException($"User with ID {id} not found.");
+                        }
+                        else
+                        {
+                            tran.Commit();
+                        }
+                    }
+                    catch (Exception )
+                    {
+
+                        tran.Rollback();
+                    }
+                    
                 }
+                
             }
 
         }

@@ -1,6 +1,10 @@
 ﻿
 using API.DTOs.Request.Login;
+using Application.Common;
+using Application.DTOs.Requests.Account;
 using Application.DTOs.Responses.Account;
+using Application.Interfaces;
+using AutoMapper;
 using Domain.Entities;
 using Domain.Enum;
 using Domain.Repositories;
@@ -9,91 +13,109 @@ using Infrastructure.Services.JwtServices;
 using Infrastructure.Services.PasswordHasher;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Application.Services
 {
-    public class AccountService
+    public class AccountService :IAccountService
     {
         private readonly IJwtService _jwtService;
         private readonly IUserRepository _userRepository;
         private readonly IPasswordHasher _passwordHasher;
+        private IMapper _mapper;
 
-        public AccountService(IJwtService jwtService,IUserRepository userRepository,IPasswordHasher passwordHasher)
+        public AccountService(IJwtService jwtService,IUserRepository userRepository,IPasswordHasher passwordHasher,IMapper mapper)
         {
+            _mapper = mapper;
             _jwtService = jwtService;
             _userRepository = userRepository;
             _passwordHasher = passwordHasher;
         }
-        public async Task<LoginResponse> Login(LoginRequest request)
+        public async Task<Result> Login(LoginRequest request)
         {
-            //Test
-            if(request.Username == "user1" || request.Password == "1234")
+            if (await _userRepository.UsernameExists(request.Username))
             {
-                var fakeUser = new User
+                string passwordHass = await _userRepository.GetPasswordByUsername(request.Username);
+
+                if (_passwordHasher.Verify(request.Password, passwordHass))
                 {
-                    UserId = Guid.NewGuid(),
-                    UserName = "tuyen.nguyen",
-                    PasswordHash = "hashed_password_123",
-                    Email = "tuyen.nguyen@example.com",
 
-                    FirstName = "Nguyễn",
-                    LastName = "Tuyên",
-                    PhoneNumber = "0987654321",
-                    DateOfBirth = new DateTime(1999, 8, 2),
-                    Gender = 0, // ví dụ enum: M = Male, F = Female, O = Other
+                    return Result<LoginResponse>.Ok<LoginResponse>
+                        (
+                        new LoginResponse() { code =1 ,
+                            message ="Login succes ",
+                            token =_jwtService.GenarateToken(await _userRepository.GetUserByUsername(request.Username))}
 
-                    EmailVerified = true,
-                    PhoneVerified = false,
-                    VerificationToken = Guid.NewGuid().ToString(),
-                    VerificationTokenExpiry = DateTimeOffset.UtcNow.AddDays(1),
-                    ResetToken = null,
-                    ResetTokenExpiry = null,
-
-                    Status = UserStatusEnum.Active, // ví dụ enum: Active, Inactive, Locked,...
-                    LastLoginAt = DateTimeOffset.UtcNow.AddDays(-1),
-                    LoginAttempts = 0,
-                    LockoutUntil = null,
-
-                    CreatedAt = DateTimeOffset.UtcNow.AddDays(-10),
-                    UpdatedAt = DateTimeOffset.UtcNow,
-                    CreatedBy = Guid.NewGuid(),
-                    UpdatedBy = Guid.NewGuid(),
-
-                    RoleId = Guid.NewGuid()
-                };
-
-                return new LoginResponse() { message="Login success",token = _jwtService.GenarateToken(fakeUser),code = 200 };
-
+                        );
+                }
+                else
+                {
+                    return Result<LoginResponse>.Fail<LoginResponse>("Login Fail", ErrorCode.AUTH_FAILED, new ArgumentException("The password isn't correct"));
+                        
+                }
             }
             else
             {
-                return new LoginResponse() { message = "Login fail", token = "null" , code = 400 };
+                return Result<LoginResponse>.Fail<LoginResponse>("Login Fail", ErrorCode.AUTH_FAILED, new ArgumentException("Username does not exists"));
             }
-            //if (await _userRepository.UsernameExists(username))
-            //{
-            //    string passwordHass  = await _userRepository.GetPasswordByUsername(username);
-
-            //    if (_passwordHasher.Verify(password, passwordHass))
-            //    {
-            //        return "Đăng nhập thành công " +"Token :" + _jwtService.GenarateToken(await _userRepository.GetUserByUsername(username));
-            //    }
-            //    else
-            //    {
-            //        return "Tên tài khoản hoặc mật khẩu không chính xác";   
-            //    }
-            //}
-            //else
-            //{
-            //    return "Tên tài khoản hoặc mật khẩu không chính xác";
-            //}
         }
 
-        //public async Task<string> Register ()
-        //{
+        public async Task<Result> RegisterAccount(RegisterAccountRequest request)
+        {
+            try
+            {       //        // Thông tin đăng nhập
+                    //        [Required(ErrorMessage = "User name is required")]
+                    //        public string UserName { get; set; }
+                    //        [Required(ErrorMessage = "Password is required")]
 
-        //}
+                //        [RegularExpression(@"^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$",
+                //        ErrorMessage = "Password phải có ít nhất 8 ký tự, bao gồm chữ và số")]
+                //        public string Password { get; set; }
+                //        [EmailAddress]
+                //        public string? Email { get; set; }
+
+                //// Thông tin cá nhân
+                //public string FirstName { get; set; }
+                //public string LastName { get; set; }
+                //[Phone]
+                //public string? PhoneNumber { get; set; }
+                //public DateTime? DateOfBirth { get; set; }
+                //public GenderEnum Gender { get; set; } // 'M', 'F', 'O'
+                //// Thông tin xác thực
+                //public bool EmailVerified { get; set; }
+                //public bool PhoneVerified { get; set; }
+
+                //// Thuộc tính tính toán (không cần mapping)
+                //public string FullName => $"{FirstName} {LastName}";
+
+                User accountRegited = _mapper.Map<User>(request);
+                accountRegited.CreatedAt = DateTime.UtcNow;
+                accountRegited.LoginAttempts = 5;
+                accountRegited.PasswordHash = _passwordHasher.Hash(request.Password);
+                bool hasEmail = !string.IsNullOrWhiteSpace(request.Email);
+                bool hasPhone = !string.IsNullOrWhiteSpace(request.PhoneNumber);
+                if (hasEmail && !hasPhone)
+                {
+                    return Result.Fail("You must enter an email or phone number", null, null);
+                }
+                accountRegited.PhoneVerified = hasPhone;
+                accountRegited.EmailVerified = hasEmail;
+
+                
+                await _userRepository.AddUserAsync(accountRegited);
+                return Result<RegisterAccountResponse>.Ok<RegisterAccountResponse>(_mapper.Map<RegisterAccountResponse>(accountRegited));
+            }
+            catch (Exception ex)
+            {
+
+                return Result<RegisterAccountResponse>.Fail<RegisterAccountResponse>("RegisterAccount Service Error",ErrorCode.DB_INSERT_FAILED, ex);
+            }
+            
+        }
+
+        
     }
 }

@@ -8,6 +8,8 @@ namespace Application.DTOs.Responses.Role
 {
     public class CreateRoleResponse
     {
+        public string RoleName { get; set; }
+        public string? Description { get; set; }
 
     }
 }

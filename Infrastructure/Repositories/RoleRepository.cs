@@ -19,18 +19,7 @@ namespace Infrastructure.Repositories
         {
             _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
         }
-        //public Guid RoleId { get; set; }
-        //public string RoleName { get; set; }
-        //public bool IsActive { get; set; }
-        //public string? Description { get; set; }
-        //public DateTimeOffset CreatedAt { get; set; }
-        //public DateTimeOffset UpdatedAt { get; set; }
-
-        //// Constructor mặc định
-        //public Role()
-        //{
-
-        //}
+        
         public async Task AddRoleAsync(Role role)
         {
             const string Sql = @"
@@ -60,10 +49,10 @@ namespace Infrastructure.Repositories
                             },transaction:tran);
                             tran.Commit();
                         }
-                        catch (Exception)
+                        catch (Exception ex)
                         {
                             tran.Rollback();
-                            throw new Exception("Insert error");
+                            throw new Exception("Insert to database Fail" , ex);
                         }
                         
                     }

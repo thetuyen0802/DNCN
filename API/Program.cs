@@ -1,8 +1,10 @@
 ﻿using Application.Helper.Mapping;
+using Application.Interfaces;
 using Application.Services;
 using Domain.Repositories;
 using Infrastructure.Repositories;
 using Infrastructure.Services.JwtServices;
+using Infrastructure.Services.Redis;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
@@ -18,7 +20,12 @@ var builder = WebApplication.CreateBuilder(args);
 // Database connection 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddSingleton<Infrastructure.Data.IConnectionFactory>(new Infrastructure.Data.SqlConnnectionFactory(connectionString));
-
+//Redis connection
+builder.Services.AddStackExchangeRedisCache(option =>
+{
+    option.Configuration = builder.Configuration.GetConnectionString("Redis");
+    option.InstanceName = "ChatApp_";
+});
 //Bycrpt Configuration 
 // Register the BcryptOption with a default work factor
 // Đọc cấu hình từ appsetting.json
@@ -31,7 +38,9 @@ builder.Services.AddSingleton(new Infrastructure.Services.PasswordHasher.BcryptO
     WorkFactor = workFactor
 });
 
-// Services Register
+
+//Infrastructure Services  Register
+builder.Services.AddScoped<ICacheService,RedisCacheService>();
 builder.Services.AddScoped<Infrastructure.Services.PasswordHasher.IPasswordHasher, Infrastructure.Services.PasswordHasher.PasswordHasher>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 ;
@@ -39,9 +48,10 @@ builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IUserRepository,Infrastrueture.Repositories.UserRepository>();
 builder.Services.AddScoped<IRoleRepository,RoleRepository>();
 //Application Services
-//builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-//builder.Services.AddAutoMapper(typeof(MappingProffile).Assembly);
-builder.Services.AddScoped<AccountService>();
+builder.Services.AddAutoMapper(typeof(MappingRequestEntity));
+builder.Services.AddAutoMapper(typeof(MappingResponseEntity));
+builder.Services.AddScoped<IAccountService,AccountService>();
+builder.Services.AddScoped<IRoleService,RoleService>();
 //JWT Authentication configuration 
 var  jwtconfig= builder.Configuration.GetSection("Jwt");
 var secretKey = jwtconfig["Key"];
